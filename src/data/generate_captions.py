@@ -5,6 +5,10 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
+"""
+Create Image Captions for a set of images using Kosmos2 and Blip2 Models
+    - Aids with generation of datasets
+"""
 
 def kosmos2_image_text_pair(model:AutoModelForVision2Seq, processor:AutoProcessor, source_folder_path=str, dest_folder_path=str):
     """
