@@ -20,6 +20,7 @@ def train(model,
     
     """
     Function to train the model
+    If change in val loss is less than 0.01 for 2 epochs in a row, stop training
 
     Args:
         model: The model that is to be evaluated
@@ -136,6 +137,18 @@ def train(model,
             except:
                 print(f"Unable to save model at epoch {epoch+1}")
 
+        #early stopping
+        if (len(val_loss) >= 3) and abs(val_loss[-2] - val_loss[-1]) < 0.01 and abs(val_loss[-3] - val_loss[-2]) < 0.01:
+            print(f"validation loss did not decrease, stopping training at epoch {epoch +1}")
+            try:
+                if overwrite:
+                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}.pt")
+                else:
+                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}_{epoch+1}.pt")
+            except:
+                print(f"Unable to save model at epoch {epoch+1}")
+            break
+        
     return train_loss, train_bleu, train_rouge, val_loss, val_bleu, val_rouge
 
 
