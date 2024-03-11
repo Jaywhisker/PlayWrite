@@ -40,12 +40,22 @@ def eval(model,
             #getting img and annotations
             imgs = imgs.to(device)
             annotations = annotations.to(device)
-            #running model prediction
-            outputs = model(imgs, annotations[:-1]) #training model to guess the last word
             
-            #updating model parameters
-            loss = criterion(outputs.reshape(-1, outputs.shape[2]), annotations.reshape(-1)) #reshape output (seq_len, N, vocabulary_size) to (N, vocabulary_size)
-
+            
+            if not batch_first:
+                #running model prediction
+                outputs = model(imgs, annotations[:-1]) #training model to guess the last word
+                
+                #updating model parameters
+                loss = criterion(outputs.reshape(-1, outputs.shape[2]), annotations.reshape(-1)) #reshape output (seq_len, N, vocabulary_size) to (N, vocabulary_size)
+            
+            if batch_first:
+                #running model prediction
+                outputs, atten_weights = model(imgs, annotations[:, :-1]) #training model to guess the last word
+                targets = annotations[:, 1:]
+                #updating model parameters
+                loss = criterion(outputs.view(-1, len(vocabulary)), targets.reshape(-1)) #reshape output (seq_len, N, vocabulary_size) to (N, vocabulary_size)
+            
             total_val_loss += loss.item()
 
             #get model predictions and update
@@ -58,7 +68,6 @@ def eval(model,
         Rouge_score = get_rouge_score(predictions, references)
 
         return total_val_loss/(idx+1), Bleu_score, Rouge_score
-
 
 if __name__ == "__main__":
     pass
