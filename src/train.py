@@ -3,6 +3,7 @@ from src.data.dataloader import *
 from src.evaluation_metrics.bleu import get_bleu_score
 from src.evaluation_metrics.rouge import get_rouge_score
 from src.evaluation_metrics.decode_prediction import decode_predictions
+import torch
 
 def train(model, 
           criterion, 
@@ -71,11 +72,21 @@ def train(model,
             #getting img and annotations
             imgs = imgs.to(device)
             annotations = annotations.to(device)
-            #running model prediction
-            outputs = model(imgs, annotations[:-1]) #training model to guess the last word
+
+            if not batch_first:
+                #running model prediction
+                outputs = model(imgs, annotations[:-1]) #training model to guess the last word
+                
+                #updating model parameters
+                loss = criterion(outputs.reshape(-1, outputs.shape[2]), annotations.reshape(-1)) #reshape output (seq_len, N, vocabulary_size) to (N, vocabulary_size)
             
-            #updating model parameters
-            loss = criterion(outputs.reshape(-1, outputs.shape[2]), annotations.reshape(-1)) #reshape output (seq_len, N, vocabulary_size) to (N, vocabulary_size)
+            if batch_first:
+                #running model prediction
+                outputs, atten_weights = model(imgs, annotations[:, :-1]) #training model to guess the last word
+                targets = annotations[:, 1:]
+                #updating model parameters
+                loss = criterion(outputs.view(-1, len(vocabulary)), targets.reshape(-1)) #reshape output (seq_len, N, vocabulary_size) to (N, vocabulary_size)
+            
             optimiser.zero_grad() #remove optimiser gradient
             loss.backward()
             optimiser.step()
@@ -131,9 +142,9 @@ def train(model,
         if save_every != None and (epoch+1)%save_every == 0:
             try:
                 if overwrite:
-                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}.pt")
+                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}.pt")
                 else:
-                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}_{epoch+1}.pt")
+                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}_{epoch+1}.pt")
             except:
                 print(f"Unable to save model at epoch {epoch+1}")
 
@@ -142,9 +153,9 @@ def train(model,
             print(f"validation loss did not decrease, stopping training at epoch {epoch +1}")
             try:
                 if overwrite:
-                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}.pt")
+                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}.pt")
                 else:
-                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}_{epoch+1}.pt")
+                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}_{epoch+1}.pt")
             except:
                 print(f"Unable to save model at epoch {epoch+1}")
             break
