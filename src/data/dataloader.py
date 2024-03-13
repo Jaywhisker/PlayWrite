@@ -174,9 +174,10 @@ class padAnnotations():
   
 
 
-def visualise_data(dataloader, batch_size: int, dataset: CustomDataset, num_batches: int = 1, num_samples: int=9):
+def visualise_img_caption_data(dataloader, batch_size: int, dataset: CustomDataset, num_batches: int = 1, num_samples: int=9):
     """
     Function to visualise the dataset
+    Used to only visualise data from CustomDataset Class
 
     Args:
         dataloader (dataloader object): Pytorch dataloader object to visualise
@@ -217,6 +218,51 @@ def visualise_data(dataloader, batch_size: int, dataset: CustomDataset, num_batc
 
 
 
+def visualise_img(dataloader, class_dict: dict):
+    """
+    Function to visualize the first 9 images of a image dataloader.
+    Used only to visualise dataloader from ImageFolder
+
+    Args:
+        dataloader (DataLoader): PyTorch DataLoader object containing the dataset to visualize.
+        class_dict (dict): Dictionary mapping class indices to class labels.
+
+    
+    Returns:
+        Plot of 9 image with its true label
+    """
+    #Get the first batch of images and labels
+    train_images, train_labels = next(iter(dataloader))
+    batch_size = train_images.size(0)  # Get the batch size
+
+    #Print the shape of the batch
+    print(f"Images batch shape: {train_images.size()}")
+    print(f"Labels batch shape: {train_labels.size()}")
+
+    #Create a 3x3 grid for visualization
+    fig, axes = plt.subplots(3, 3, figsize=(9, 9))
+
+    for i in range(3):
+        for j in range(3):
+            #Get the index of the image in the batch
+            index = i * 3 + j
+
+            if index < batch_size:
+                #Prepare image to print
+                img = train_images[index].squeeze().numpy().transpose((1, 2, 0))
+                label = train_labels[index].item()
+
+                #Plot the image
+                axes[i, j].imshow(img)
+                axes[i, j].axis('off')
+                axes[i, j].set_title(f'Label: {label}, {class_dict[label]}', loc='left')
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+
 
 if __name__ == '__main__':
     image_size = (299,299)
@@ -242,7 +288,7 @@ if __name__ == '__main__':
                         ))
         
         print("Dataset Loaded Successfully")
-        visualise_data(dataloader, batch_size, dataset)
+        visualise_img_caption_data(dataloader, batch_size, dataset)
 
     except Exception as e:
        print(f"Unable to load dataset, error: {e}")

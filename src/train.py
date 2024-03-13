@@ -2,8 +2,10 @@ import torch
 from src.data.dataloader import *
 from src.evaluation_metrics.bleu import get_bleu_score
 from src.evaluation_metrics.rouge import get_rouge_score
-from src.evaluation_metrics.decode_prediction import decode_predictions
+from src.evaluation_metrics.utils import decode_predictions
 import torch
+import torch
+
 
 def train(model, 
           criterion, 
@@ -138,29 +140,45 @@ def train(model,
 
             print("------------------------------------------------------------------")
             
-        #saving model
+        #saving model every x
         if save_every != None and (epoch+1)%save_every == 0:
             try:
                 if overwrite:
-                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}.pt")
+                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}.pt")
                 else:
-                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}_{epoch+1}.pt")
+                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}_{epoch+1}.pt")
             except:
                 print(f"Unable to save model at epoch {epoch+1}")
+
+        
+        #saving best model
+        if (len(val_loss) > 1) and val_loss[-1] < min(val_loss[:-1]):
+            try:
+                torch.save(model.state_dict(), f"../models/image_captioning/{model_name}_best.pt")
+            except:
+                print(f"Unable to save best model")
+        
 
         #early stopping
         if (len(val_loss) >= 3) and abs(val_loss[-2] - val_loss[-1]) < 0.01 and abs(val_loss[-3] - val_loss[-2]) < 0.01:
             print(f"validation loss did not decrease, stopping training at epoch {epoch +1}")
             try:
                 if overwrite:
-                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}.pt")
+                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}.pt")
                 else:
-                    torch.save(model.state_dict(), f"/models/image_captioning/{model_name}_{epoch+1}.pt")
+                    torch.save(model.state_dict(), f"../models/image_captioning/{model_name}_{epoch+1}.pt")
             except:
                 print(f"Unable to save model at epoch {epoch+1}")
             break
-        
+
+
     return train_loss, train_bleu, train_rouge, val_loss, val_bleu, val_rouge
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
