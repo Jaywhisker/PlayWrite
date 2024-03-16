@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from src.data.dataloader import *
 
+
 def unnormalize(image:np.array, mean:np.array, std:np.array):
     """
     Function to unnormalize an image given its mean and std
@@ -20,11 +21,9 @@ def unnormalize(image:np.array, mean:np.array, std:np.array):
     return image
 
 
-def caption_image(model, dataloader, vocabulary:Vocabulary, device:str, mean:np.array, std:np.array, num_batches:int=1, num_images:int=5, max_length:int=50, show_plot:bool=False):
+def caption_image(model, dataloader, vocabulary:Vocabulary, device:str, mean:np.array=np.array([0.485, 0.456, 0.406]), std:np.array=np.array([0.229, 0.224, 0.225]), num_batches:int=1, num_images:int=5, max_length:int=50, show_plot:bool=False):
     """
     Function to generate model predictions from a dataloader
-
-    Note: model class should already contain function caption image with 4 inputs (image, vocabularly, device, max_length) and 2 outputs generation caption, attention (Or None)
 
     Arg:
         model: model to general model prediction (ensure that your model has the function caption_image)
@@ -38,6 +37,8 @@ def caption_image(model, dataloader, vocabulary:Vocabulary, device:str, mean:np.
         max_length (int, optional): maximum length of generated captions, defaults to 50
         show_plot (bool, optional): show the image and generated captions in a plot, defaults to False
     
+    Returns:
+        all_predictions (dict): Dictionary containing the list of all generated captions and actual captions
     
     """
     model.eval()
@@ -73,7 +74,6 @@ def caption_image(model, dataloader, vocabulary:Vocabulary, device:str, mean:np.
             all_predictions['Possible Captions'].append(all_annotations[i])
 
     return all_predictions
-
 
 
 def multiple_model_captions(model_list, dataloader, vocabulary:Vocabulary, device:str, mean:np.array=np.array([0.485, 0.456, 0.406]), std:np.array=np.array([0.229, 0.224, 0.225]), num_batches:int=1, num_images:int=5, max_length:int=50, show_plot:bool=False):
@@ -114,7 +114,8 @@ def multiple_model_captions(model_list, dataloader, vocabulary:Vocabulary, devic
 
             for idx, model in enumerate(model_list):
                 #generate captions from model
-                generated_caption = model.caption_image(image, vocabulary, max_length=max_length)
+                generated_caption, attention = model.caption_image(image, vocabulary, device, max_length=max_length)
+                print(generated_caption)
                 all_captions.append(" ".join(generated_caption[1:-1]))
                 model_predictions = all_predictions['Predicted'].get(f"model_{idx}", [])
                 all_predictions['Predicted'][f"model_{idx}"] = model_predictions.append(all_captions)
@@ -127,7 +128,11 @@ def multiple_model_captions(model_list, dataloader, vocabulary:Vocabulary, devic
                 img = np.transpose(img.numpy(), (1, 2, 0))
                 ax.imshow(img)
                 ax.axis('off')
-                ax.set_title(f'All Model Predictions:\n{"\n".join(all_captions)}\n\nAll Possible Predictions:\n' + "\n".join(all_annotations[i]), loc='left')
+
+                pred = '\n'.join(all_captions)
+                annotation = '\n'.join(all_annotations[i])
+
+                ax.set_title(f'All Model Predictions:\n{pred}\n\nAll Possible Predictions:\n{annotation}', loc='left')
 
                 plt.tight_layout()
                 plt.show()
