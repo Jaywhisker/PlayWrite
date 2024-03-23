@@ -21,13 +21,24 @@ def unnormalize(image:np.array, mean:np.array, std:np.array):
     return image
 
 
-def caption_image(model, dataloader, vocabulary:Vocabulary, device:str, mean:np.array=np.array([0.485, 0.456, 0.406]), std:np.array=np.array([0.229, 0.224, 0.225]), num_batches:int=1, num_images:int=5, max_length:int=50, show_plot:bool=False):
+def caption_image(model, 
+                  dataloader, 
+                  image_size:tuple,
+                  vocabulary:Vocabulary, 
+                  device:str, 
+                  mean:np.array=np.array([0.485, 0.456, 0.406]), 
+                  std:np.array=np.array([0.229, 0.224, 0.225]), 
+                  num_batches:int=1, 
+                  num_images:int=5, 
+                  max_length:int=50, 
+                  show_plot:bool=False):
     """
     Function to generate model predictions from a dataloader
 
     Arg:
         model: model to general model prediction (ensure that your model has the function caption_image)
         dataloader: dataset to generate prediction
+        image_size (tuple): image size of images for the model
         vocabulary (Vocabulary): dataset vocabulary
         device (str): cpu or cuda,
         mean (np.array): Numpy array of the mean used for normalisation
@@ -49,9 +60,10 @@ def caption_image(model, dataloader, vocabulary:Vocabulary, device:str, mean:np.
     for j in range(num_batches):
         #load images from dataloader
         features, annotations, all_annotations = next(iter(dataloader))
-        
+
         #take first k from batch
         for i in range(num_images):
+            features = torch.nn.functional.interpolate(features, size=image_size, mode='bilinear') #resize image for model, using same as transforms.resize()
             image = features[i].unsqueeze(0).to(device)
             
             #generate captions from model
@@ -76,12 +88,23 @@ def caption_image(model, dataloader, vocabulary:Vocabulary, device:str, mean:np.
     return all_predictions
 
 
-def multiple_model_captions(model_list, dataloader, vocabulary:Vocabulary, device:str, mean:np.array=np.array([0.485, 0.456, 0.406]), std:np.array=np.array([0.229, 0.224, 0.225]), num_batches:int=1, num_images:int=5, max_length:int=50, show_plot:bool=False):
+def multiple_model_captions(
+        model_list:list[str, tuple],
+        dataloader, 
+        vocabulary:Vocabulary, 
+        device:str, 
+        mean:np.array=np.array([0.485, 0.456, 0.406]), 
+        std:np.array=np.array([0.229, 0.224, 0.225]), 
+        num_batches:int=1, 
+        num_images:int=5, 
+        max_length:int=50, 
+        show_plot:bool=False):
     """
     Function to generate model predictions for multiple models from the same dataloader
 
     Arg:
-        model_list: list of model to general model prediction (ensure that your model has the function caption_image)
+        model_list (list[str, tuple]): list of [model, img_size] to general model prediction (ensure that your model has the function caption_image)
+            eg. [[model1, (224,224)], [model2, (256,256)]]
         dataloader: dataset to generate prediction
         vocabulary (Vocabulary): dataset vocabulary
         device (str): cpu or cuda,
@@ -96,7 +119,7 @@ def multiple_model_captions(model_list, dataloader, vocabulary:Vocabulary, devic
         all_predictions (dict): Dictionary containing the dictionary of all generated captions for each model and list of actual captions
     
     """
-    for model in model_list:
+    for model, img_size in model_list:
         model.eval()
 
     #dictionary containing all the generated predictions and actual predictions
@@ -112,13 +135,15 @@ def multiple_model_captions(model_list, dataloader, vocabulary:Vocabulary, devic
             image = features[i].unsqueeze(0).to(device)
             all_captions = []
 
-            for idx, model in enumerate(model_list):
+            for idx, (model, img_size) in enumerate(model_list):
+                #resize image
+                image = torch.nn.functional.interpolate(image, size=img_size, mode='bilinear') #resize image
                 #generate captions from model
                 generated_caption, attention = model.caption_image(image, vocabulary, device, max_length=max_length)
-                print(generated_caption)
                 all_captions.append(" ".join(generated_caption[1:-1]))
                 model_predictions = all_predictions['Predicted'].get(f"model_{idx}", [])
-                all_predictions['Predicted'][f"model_{idx}"] = model_predictions.append(all_captions)
+                model_predictions.append(all_captions)
+                all_predictions['Predicted'][f"model_{idx}"] = model_predictions
 
             #plot image and captions
             if show_plot:
@@ -140,7 +165,6 @@ def multiple_model_captions(model_list, dataloader, vocabulary:Vocabulary, devic
             all_predictions['Possible Captions'].append(all_annotations[i])
 
     return all_predictions
-
 
 if __name__ == "__main__":
     pass

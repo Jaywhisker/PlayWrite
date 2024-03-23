@@ -10,6 +10,13 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 
 
+"""
+Dataloader and visualisation code
+1. CustomDataset() -> Image caption dataset
+2. visualise_img_caption_data() -> visualisation for image-captioning dataset
+3. visualise_img() -> visualisation for finetuning CNN dataset
+"""
+
 #Tokenizer to split sentences into a list of words
 word_tokenizer = spacy.load("en_core_web_sm")
 
@@ -259,6 +266,7 @@ def visualise_img(dataloader, class_dict: dict):
 
     plt.tight_layout()
     plt.show()
+
 
 
 
