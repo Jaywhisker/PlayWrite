@@ -15,10 +15,16 @@ def build_show_processes_section():
     "Music Successfully Generated!"
   ]
 
+  placeholders = [
+    "Caption Example",
+    "Combined Text Example"
+  ]
+
+  st.markdown("---")
   st.markdown("## Logging Music Generation Process")
   st.markdown("###")
 
-  for step, success_message in zip(process_steps, process_steps_success):
+  for index, (step, success_message) in enumerate(zip(process_steps, process_steps_success)):
     status_text = st.empty()
     progress_bar = st.empty()
 
@@ -26,10 +32,14 @@ def build_show_processes_section():
       status_text.markdown(f"{step}")
       progress_bar.progress(percent_complete)
       time.sleep(0.05)
-    
+
     status_text.empty()
     progress_bar.empty()
-    st.success(f"{success_message}")
+    
+    if index < len(placeholders):
+      st.success(f"{success_message}\n\nOutput: {placeholders[index]}")
+    else:
+      st.success(f"{success_message}")
 
     time.sleep(1)
 

@@ -7,6 +7,8 @@ def upload_image():
 
   if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, use_column_width=True)
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+      st.image(image, width=300)
 
   return uploaded_file

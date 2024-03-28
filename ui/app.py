@@ -28,16 +28,32 @@ st.set_page_config(
   }
 )
 
-st.title("PlayWrite: AI-Powered Ambient Game Music Generator 🎵🎮")
+tab1, tab2 = st.tabs(["Home", "Visualizations"])
 
-# MAIN FUNCTION
-def main():
-  build_sidebar()
-  uploaded_image, supporting_text, generate_music = build_music_generation_section()
+# HOME TAB
+with tab1:
+  st.title("PlayWrite: AI-Powered Ambient Game Music Generator 🎵🎮")
+
+  def main():
+    epochs, steps = build_sidebar()
+
+    left_col, right_col = st.columns([2, 1], gap="large")
+    is_music_generated = False
+
+    with left_col:
+      uploaded_image, supporting_text, generate_music = build_music_generation_section()
+
+      if generate_music:
+        is_music_generated = build_show_processes_section()
+      
+    with right_col:
+      build_music_player_section(is_music_generated)
+
+  if __name__ == "__main__":
+    main()
+
+# VISUALIZATIONS TAB
+with tab2:
+  st.title("Data Visualization 📊")
   
-  if generate_music:
-    is_music_generated = build_show_processes_section()
-    build_music_player_section(is_music_generated)
-
-if __name__ == "__main__":
-  main()
+  
