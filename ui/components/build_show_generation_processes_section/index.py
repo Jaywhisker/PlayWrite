@@ -3,15 +3,35 @@ import streamlit as st
 import time
 import sys
 import os
-from src.main import playWrite, generate
+import gc
 import torch
+import soundfile as sf
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-if project_root not in sys.path:
-    sys.path.append(project_root)
+# CONFIGURE FILE PATHS
+current_dir = os.path.dirname(__file__)
+project_root = os.path.abspath(os.path.join(current_dir, '..', '..', '..'))
+models_path = os.path.join(project_root, 'models')
+resources_path = os.path.join(project_root, 'resources')
+audio_files_path = os.path.join(project_root, 'ui', 'audio_files')
+
+sys.path.append(project_root)
+from src.main import playWrite
 from utils.generate_audio_file_name import generate_audio_file_name
 
-def build_show_generation_processes_section(supporting_text, uploaded_image):
+def empty_cuda_cache(playwrite, index):
+  if index == 0:
+    del playwrite.image_caption
+  elif index == 1:
+    del playwrite.llama_model
+
+  torch.cuda.empty_cache()
+  gc.collect()
+
+def build_show_generation_processes_section(supporting_text, uploaded_image, steps):
+  st.markdown("---")
+  st.markdown("## The Music Generation Process")
+  st.markdown("###")
+
   process_steps = [
     "Captioning Image...",
     "Creating Music Generation Prompt...",
@@ -24,44 +44,43 @@ def build_show_generation_processes_section(supporting_text, uploaded_image):
     "Music Successfully Generated!"
   ]
 
-  dynamic_input = []
+  text_prompt = supporting_text
+  byte_image = uploaded_image.getvalue()
+  is_music_generated = False
+  audio_file_name = ''
+  image_caption = ''
+  music_prompt = ''
 
   # INTEGRATION OF MODEL
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   PlayWrite = playWrite(device=device,
-                        vocab_path='resources/Vocabulary.pkl',
-                        image_caption_path='models/image_captioning/model.pt',
+                        vocab_path=os.path.join(resources_path, 'Vocabulary.pkl'),
+                        image_caption_path=os.path.join(models_path, 'image_captioning', 'model.pt'),
                         hg_access_token=None,
-                        llama_model_path='models/llama/model',
-                        llama_tokenizer_path='models/llama/tokenizer')
+                        llama_model_path=os.path.join(models_path, 'llama', 'model'),
+                        llama_tokenizer_path=os.path.join(models_path, 'llama', 'tokenizer'))
 
-  st.markdown("---")
-  st.markdown("## The Music Generation Process")
-  st.markdown("###")
-
+  # PROCESSING STEPS
   for index, (step, success_message) in enumerate(zip(process_steps, process_steps_success)):
-    status_text = st.empty()
-    progress_bar = st.empty()
+    with st.spinner(f"{step}"):
+      if index == 0:
+        image_caption = PlayWrite.caption_image(byte_image, model=PlayWrite.image_caption, vocab=PlayWrite.vocab, device=PlayWrite.device, max_length=50)
+        output_message = f"{success_message}\n\nOutput: {image_caption}"
 
-    for percent_complete in range(101):
-      status_text.markdown(f"{step}")
-      progress_bar.progress(percent_complete)
-      time.sleep(0.05)
+      elif index == 1:
+        music_prompt = PlayWrite.generate_music_prompt(caption=image_caption, text_prompt=text_prompt, llama_model=PlayWrite.llama_model, llama_tokenizer=PlayWrite.llama_tokenizer, device=PlayWrite.device)
+        output_message = f"{success_message}\n\nOutput: {music_prompt}"
 
-    status_text.empty()
-    progress_bar.empty()
-    
-    if index < len(dynamic_input):
-      st.success(f"{success_message}\n\nOutput: {dynamic_input[index]}")
-    else:
-      st.success(f"{success_message}")
+      elif index == 2:
+        music = PlayWrite.generate_music(music_prompt=music_prompt, model=PlayWrite.mustango, steps=steps, guidance=3)
+        audio_file_name = generate_audio_file_name()
+        audio_file_path = os.path.join(audio_files_path, audio_file_name)
+        sf.write(audio_file_path, music, samplerate=16000)
+        output_message = success_message
 
-    time.sleep(1)
+      st.success(output_message)
+      empty_cuda_cache(PlayWrite, index)
 
   st.markdown("---")
-  st.markdown(f"SHOWWW {generate_audio_file_name()}")
-
-  is_music_generated = True
-  audio_file_name = 'placeholder_audio.mp3'
 
   return is_music_generated, audio_file_name
