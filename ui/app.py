@@ -5,8 +5,7 @@ from components.sidebar.index import build_sidebar
 from components.build_music_generation_section.index import build_music_generation_section
 from components.build_show_generation_processes_section.index import build_show_generation_processes_section
 from components.build_music_player_section.index import build_music_player_section
-
-from components.visualizations.revised import analyze_caption_lengths, analyze_caption_lengths_by_class, find_repeated_captions, visualize_top_words
+from components.build_captions_visualizations.index import build_captions_visualizations
 
 # PAGE CONFIGURATIONS
 st.set_page_config(
@@ -59,38 +58,7 @@ with tab1:
 
 # VISUALIZATIONS TAB
 with tab2:
-  st.title("Data Visualization 📊")
+  st.title("Data Visualizations 📊")
 
-  blip_output_file = './Blip_Label.csv'
-  kosomos_output_file = './Kosmos_Label.csv'
-  flicker30k_file = './flick30k_filtered_result.csv'
-  file_path = [blip_output_file, kosomos_output_file, flicker30k_file]
-
-  file_path_with_label = [
-    { 'file_path': blip_output_file, 'title': 'Blip' },
-    { 'file_path': kosomos_output_file, 'title': 'Kosmos' },
-    { 'file_path': flicker30k_file, 'title': 'Flicker30k' }
-  ]
-
-  col_container = st.container()
-
-  with col_container:
-      # Create a column for each item
-      cols = st.columns(len(file_path_with_label))
-      
-      for i, item in enumerate(file_path_with_label):
-          with cols[i]:  # This specifies which column to use for the following commands
-              st.subheader(item['title'])  # Display the title in the column
-              with st.expander("Analyze Caption Lengths"):
-                analyze_caption_lengths(item['file_path'], item['title'])              
-              
-              if (item['title'] != 'Flicker30k'):
-                with st.expander("Analyze Caption Lengths by Class"):
-                  analyze_caption_lengths_by_class(item['file_path'])
-                  st.markdown('---')
-                  
-                with st.expander("Find Repeated Captions"):
-                  find_repeated_captions(item['file_path'])
-                  st.markdown('---')
-                
-                visualize_top_words(item['file_path'], item['title'])
+  build_captions_visualizations()
+  
