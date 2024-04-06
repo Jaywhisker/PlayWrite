@@ -1,18 +1,16 @@
-# IMPORT LIBRARIES
+# IMPORTS
 import streamlit as st
-
-# IMPORT COMPONENTS
 from .sidebar_header import sidebar_header
-from .generate_music_params import generate_music_params
+from .mustango_params import mustango_params
 
-def build_sidebar():
+def build_sidebar(disabled=False):
   with st.sidebar:
     sidebar_header()
     st.markdown("###")
 
-    num_epochs, steps = generate_music_params()
+    steps = mustango_params(disabled=disabled)
     st.markdown("###")
 
     st.markdown('---')
 
-    return num_epochs, steps
+    return steps
