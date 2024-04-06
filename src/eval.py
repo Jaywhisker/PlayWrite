@@ -2,6 +2,7 @@ import torch
 from src.data.dataloader import *
 from src.evaluation_metrics.bleu import get_bleu_score
 from src.evaluation_metrics.rouge import get_rouge_score
+from src.evaluation_metrics.meteor import get_meteor_score
 from src.evaluation_metrics.utils import decode_predictions
 
 
@@ -38,6 +39,7 @@ def eval(model,
         avg_val_loss: average validation loss
         Bleu_score: dictionary of BLEU 1-4 score
         Rouge_score: dictionary of Rouge  1,2,L,LSum score
+        Meteor_score: dictionary of Meteor Score
     """
     
     model.eval()
@@ -87,8 +89,10 @@ def eval(model,
 
         Bleu_score = get_bleu_score(predictions, references)
         Rouge_score = get_rouge_score(predictions, references)
+        Meteor_score = get_meteor_score(predictions, references)
 
-        return total_val_loss/(idx+1), Bleu_score, Rouge_score
+        return total_val_loss/(idx+1), Bleu_score, Rouge_score, Meteor_score
+
 
 
 

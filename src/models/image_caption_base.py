@@ -15,31 +15,34 @@ class EncoderCNN(torch.nn.Module):
   InceptionV3 CNN Encoder Model, last layer is always trainable
 
   Args:
+      finetuned_model: Finetuned InceptionV3 model, else None
       embed_size (int): Embedding dimension to convert features size to
-      train_cnn (bool, optional): Determines if the entire CNN model will be unfreeze and trained during the training
+      train_CNN (bool, optional): Determines if the entire CNN model will be unfreeze and trained during the training
   """
-  def __init__(self, embed_size:int, train_CNN:bool=False):
+  def __init__(self, finetuned_model, embed_size:int, train_CNN:bool=False):
     super(EncoderCNN, self).__init__()
-    self.train_CNN = train_CNN
-    self.inception = models.inception_v3(weights=models.Inception_V3_Weights.DEFAULT)
-    self.inception.aux_logits=False #prevent training
+    #load pre-trained model
+    if finetuned_model != None:
+        self.inception = list(finetuned_model.children())[0]
+    else:
+        self.inception = models.inception_v3(weights=models.Inception_V3_Weights.DEFAULT)
+    self.inception.aux_logits = False
+
     #converting the last layer of inception to linear layer [inception last layer input, embed size]
     self.inception.fc = torch.nn.Linear(self.inception.fc.in_features, embed_size) 
+    #Train the feature map, the rest depends on train_CNN
+    for name, param in self.inception.named_parameters():
+      if "fc.weight" in name or "fc.bias" in name:
+        param.requires_grad = True #finetuning the last layer
+      else:
+        param.requires_grad = train_CNN
+
     self.relu = torch.nn.ReLU()
     self.dropout = torch.nn.Dropout(p=0.5)
 
 
   def forward(self, images):
     features = self.inception(images)
-
-    for name, param in self.inception.named_parameters():
-      if "fc.weight" in name or "fc.bias" in name:
-        param.requires_grad = True #finetuning the last layer
-
-      #rest of layers depends on the train_CNN 
-      else:
-        param.requires_grad = self.train_CNN
-
     return self.dropout(self.relu(features))
 
 
@@ -68,7 +71,6 @@ class DecoderRNN(torch.nn.Module):
     outputs = self.linear(hiddens)
     return outputs
   
-
 class CNNtoRNN(torch.nn.Module):
   """
   Model that merges Encoder CNN to Decoder RNN
@@ -80,9 +82,9 @@ class CNNtoRNN(torch.nn.Module):
       num_layers (int): Total number of LSTM layers
       train_cnn (bool, optional): Determines if unfreezing entire InceptionV3 model, defaults to False
   """
-  def __init__(self, embed_size:int, hidden_size:int, vocab_size:int, num_layers:int, train_cnn:bool=False):
+  def __init__(self, finetuned_model, embed_size:int, hidden_size:int, vocab_size:int, num_layers:int, train_cnn:bool=False):
     super(CNNtoRNN, self).__init__()
-    self.encoderCNN = EncoderCNN(embed_size, train_cnn)
+    self.encoderCNN = EncoderCNN(finetuned_model, embed_size, train_cnn)
     self.decoderRNN = DecoderRNN(embed_size, hidden_size, vocab_size, num_layers)
 
   #for training with a caption
