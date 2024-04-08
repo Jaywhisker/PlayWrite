@@ -12,20 +12,52 @@ import torch
 from torchvision import transforms, models
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
 
+
+# Resolving importing errors 
+"""
+Main challenge: Mustango requires to be in its root directory to be imported
+
+main.py expects itself to be called from the root folder but may be called by /ui by streamlit
+
+Checks which path is calling it and revert itself back to the root folder as necessary
+"""
+original_path = sys.path
+print(os.getcwd())
+
+def is_current_directory(target):
+    current_dir_name = os.path.basename(os.getcwd())
+    return current_dir_name == target
+
+#UI folder is calling function, return to root folder
+if not is_current_directory('PlayWrite'):
+    os.chdir('../') 
+    sys.path.insert(1, os.getcwd())
+
+
+#Imports from root folder
 from src.data.dataloader import Vocabulary
 from src.models.finetuned_cnn import PreTrainedCNNModels
 from src.models.image_caption_attention import *
 from src.utils.llama_prompt_template import PromptTemplate
 
+print(os.getcwd())
+
 #updating the mustango path to allow for import
 os.chdir('models/mustango')
-original_path = sys.path
+sys.path = original_path #revert to original before updating again
 sys.path.insert(1, os.getcwd())
+print(os.getcwd())
+
 from mustango import Mustango
 
 #revert system path to original
 sys.path = original_path
-os.chdir('../..')
+
+if not is_current_directory('PlayWrite'):
+    os.chdir('../../ui') #head to ui folder
+else:
+    os.chdir('../..')
+
 
 
 """
@@ -44,12 +76,11 @@ class playWrite():
                  llama_model_path: str=None,
                  llama_tokenizer_path:str=None
                  ):
-        
         self.vocab = self._load_vocab(vocab_path)
         self.image_caption = self._load_image_caption(image_caption_path, device)
         self.llama_model, self.llama_tokenizer = self._load_llama(hg_access_token, llama_model_path, llama_tokenizer_path)
         self.mustango = self._load_mustango()
-        self.device = device  
+        self.device = device
 
     def _load_vocab(self, filepath:str):
         file = open(filepath, 'rb')
@@ -106,7 +137,7 @@ class playWrite():
 
 
 
-    def caption_image(self, image:bytes, model:InceptV3EncoderAttentionDecoder, vocab:Vocabulary, device:str, max_length:int=50):
+    def caption_image(self, image:bytes, model:InceptV3EncoderAttentionDecoder, vocab: Vocabulary, device:str, max_length:int=50):
         """
         Function to caption uploaded image from streamlit
 
@@ -259,28 +290,29 @@ def generate(playwrite:playWrite, byte_image:bytes, text_prompt:str, max_length:
 
 
 if __name__ == "__main__":
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    PlayWrite = playWrite(device=device,
-                          vocab_path='resources/Vocabulary.pkl',
-                          image_caption_path='models/image_captioning/model.pt',
-                          hg_access_token=None,
-                          llama_model_path='models/llama/model',
-                          llama_tokenizer_path='models/llama/tokenizer')
+    print("Import completed!")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # PlayWrite = playWrite(device=device,
+    #                       vocab_path='resources/Vocabulary.pkl',
+    #                       image_caption_path='models/image_captioning/model.pt',
+    #                       hg_access_token=None,
+    #                       llama_model_path='models/llama/model',
+    #                       llama_tokenizer_path='models/llama/tokenizer')
     
-    print("All models loaded")
-    with open("input/Landscape/Test/Images/image_00001.jpg", "rb") as uploaded_image:
-        f = uploaded_image.read()
-        b = bytearray(f)
-    text_prompt = "racing game among 12 players with power ups scattered around the map"
+    # print("All models loaded")
+    # with open("input/Landscape/Test/Images/image_00001.jpg", "rb") as uploaded_image:
+    #     f = uploaded_image.read()
+    #     b = bytearray(f)
+    # text_prompt = "racing game among 12 players with power ups scattered around the map"
 
-    print("Generating music")
-    generated_music = generate(playwrite=PlayWrite,
-                                byte_image=b,
-                                text_prompt=text_prompt,
-                                max_length=50,
-                                steps=150,
-                                guidance=3,
-                                delete_model=True)
-    print("Generating music completed.")
-    sf.write(f"resources/music_results/test.wav", generated_music, samplerate=16000) #no space allowed
+    # print("Generating music")
+    # generated_music = generate(playwrite=PlayWrite,
+    #                             byte_image=b,
+    #                             text_prompt=text_prompt,
+    #                             max_length=50,
+    #                             steps=150,
+    #                             guidance=3,
+    #                             delete_model=True)
+    # print("Generating music completed.")
+    # sf.write(f"resources/music_results/test.wav", generated_music, samplerate=16000) #no space allowed
 

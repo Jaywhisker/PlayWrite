@@ -1,11 +1,20 @@
 # IMPORTS
 import streamlit as st
+import os
+import sys
 from PIL import Image
+
 from components.sidebar.index import build_sidebar
 from components.build_music_generation_section.index import build_music_generation_section
 from components.build_show_generation_processes_section.index import build_show_generation_processes_section
 from components.build_music_player_section.index import build_music_player_section
 from components.build_captions_visualizations.index import build_captions_visualizations
+
+from src.data.dataloader import Vocabulary
+from src.models.finetuned_cnn import PreTrainedCNNModels
+from src.models.image_caption_attention import *
+from src.utils.llama_prompt_template import PromptTemplate
+
 
 # PAGE CONFIGURATIONS
 st.set_page_config(
