@@ -68,7 +68,6 @@ def build_show_generation_processes_section(supporting_text, uploaded_image, ste
                         hg_access_token=None,
                         llama_model_path=os.path.join(models_path, 'llama', 'model'),
                         llama_tokenizer_path=os.path.join(models_path, 'llama', 'tokenizer'))
-  print(PlayWrite)
   # PROCESSING STEPS
   for index, (step, success_message) in enumerate(zip(process_steps, process_steps_success)):
     with st.spinner(f"{step}"):
@@ -81,11 +80,17 @@ def build_show_generation_processes_section(supporting_text, uploaded_image, ste
         output_message = f"{success_message}\n\nOutput: {music_prompt}"
 
       elif index == 2:
-        music = PlayWrite.generate_music(music_prompt=music_prompt, model=PlayWrite.mustango, steps=steps, guidance=3)
-        audio_file_name = generate_audio_file_name()
-        audio_file_path = os.path.join(audio_files_path, audio_file_name)
-        sf.write(audio_file_path, music, samplerate=16000)
+        """
+          If we were to have more computing power, then the commented out code is used to connect and load the music from Mustango.
+          As for demonstration purposes and the usability of this UI, we are simply simulating how this process would work using a placehlder mp3 file.
+        """
+        # music = PlayWrite.generate_music(music_prompt=music_prompt, model=PlayWrite.mustango, steps=steps, guidance=3)
+        # audio_file_name = generate_audio_file_name()
+        # audio_file_path = os.path.join(audio_files_path, audio_file_name)
+        # sf.write(audio_file_path, music, samplerate=16000)
+        audio_file_name = 'placeholder.mp3'
         output_message = success_message
+        is_music_generated = True
 
       st.success(output_message)
       empty_cuda_cache(PlayWrite, index)
