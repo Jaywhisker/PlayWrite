@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import string
 from nltk.corpus import stopwords
+from wordcloud import WordCloud
 
 def clean_and_split(text):
     """
@@ -88,6 +89,35 @@ def plot_top_words(counter, title):
     plt.gca().invert_yaxis() 
     plt.show()
 
+def word_cloud(counter, title):
+    """
+    Generate and display a word cloud from the given counter.
+
+    Args:
+        counter (Counter): Counter object containing word frequencies.
+        title (str): Title for the word cloud.
+    """
+    wordcloud = WordCloud(width=800, height=400, background_color ='white').generate_from_frequencies(counter)
+                     
+    plt.figure(figsize=(10, 5), facecolor=None)
+    plt.imshow(wordcloud)
+    plt.axis("off")
+    plt.tight_layout(pad=0)
+    plt.title(title, fontsize=24)
+    plt.show()
+
+def generate_word_clouds(dataset_files):
+    """
+    Analyze datasets and generate word clouds for each without printing analysis details.
+
+    Args:
+        dataset_files (dict): Dictionary containing DataFrames, where keys are dataset labels and values are DataFrames.
+    """
+    for label, df in dataset_files.items():
+        # Call analyze_dataset with print_details set to False
+        _, clean_counter = analyze_dataset(df, label, print_details=False)
+        word_cloud(clean_counter, f"Word Cloud for {label}")
+
 # Analyze BLIP2 and Kosmos2 Datasets 
 landscape_path = dict(list(file_path.items())[:2])
 all_counter_first_two, clean_counter_first_two = analyze_all_datasets(landscape_path, "For Landscape Dataset")
@@ -96,3 +126,6 @@ plot_top_words(clean_counter_first_two, "Word Count for Both BLIP2 and Kosmos2 D
 # Analyze All Data
 all_counter_all, clean_counter_all = analyze_all_datasets(file_path, "For All Datasets")
 plot_top_words(clean_counter_all, "Word Count for All Datasets")
+
+# Word Cloud for each data
+generate_word_clouds(file_path)
