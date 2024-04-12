@@ -7,3 +7,4 @@ models/image_captioning/*
 !models/image_captioning/encoder.pt
 !models/image_captioning/model.pt
 __pycache__
+notebooks/data/inaSpeechSegmenter
