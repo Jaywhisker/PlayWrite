@@ -1,3 +1,4 @@
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -38,8 +39,8 @@ def analyze_dataset(df, dataset_label):
     unique_words = set(all_words)
     unique_words_clean = set(all_words_clean)
     
-    print(f"Unique words of {dataset_label}: {len(unique_words)}")
-    print(f"Unique words w/o stopwords of {dataset_label}: {len(unique_words_clean)}")
+    st.write(f"Unique words of {dataset_label}: {len(unique_words)}")
+    st.write(f"Unique words w/o stopwords of {dataset_label}: {len(unique_words_clean)}")
 
     return Counter(all_words), Counter(all_words_clean)
 
@@ -58,14 +59,14 @@ def analyze_all_datasets(dataset_files, report_label):
     clean_counter = Counter()
     
     for label, df in dataset_files.items():
-        print(f"\nAnalyzing dataset: {label}")
+        st.write(f"\nAnalyzing dataset: {label}")
         counter, clean = analyze_dataset(df, label)
         all_counter += counter
         clean_counter += clean
 
-    print(f"\n{report_label}:")
-    print(f"Total unique words: {len(all_counter)}")
-    print(f"Total unique words w/o stopwords: {len(clean_counter)}")
+    st.write(f"\n{report_label}:")
+    st.write(f"Total unique words: {len(all_counter)}")
+    st.write(f"Total unique words w/o stopwords: {len(clean_counter)}")
 
     return all_counter, clean_counter
 
@@ -82,12 +83,13 @@ def plot_top_words(counter, title):
 
     custom_color = (0.1, 0.4, 0.8)
     
-    plt.figure(figsize=(5, 3))  # Adjusted the size for better visibility
+    plt.figure(figsize=(5, 3))
     plt.barh(words, counts, color=custom_color, height=0.7)
     plt.xlabel('Frequency')
     plt.title(title)
-    plt.gca().invert_yaxis() 
-    plt.show()
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+    st.pyplot(plt)
 
 def word_cloud(counter, title):
     """
@@ -102,9 +104,9 @@ def word_cloud(counter, title):
     plt.figure(figsize=(10, 5), facecolor=None)
     plt.imshow(wordcloud)
     plt.axis("off")
-    plt.tight_layout(pad=0)
     plt.title(title, fontsize=24)
-    plt.show()
+    plt.tight_layout(pad=0)
+    st.plyplot(plt)
 
 def generate_word_clouds(dataset_files):
     """

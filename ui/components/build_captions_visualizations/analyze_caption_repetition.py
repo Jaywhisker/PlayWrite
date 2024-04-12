@@ -2,34 +2,38 @@
 import streamlit as st
 import pandas as pd
 
-def find_repeated_captions(df, title):
+def analyze_caption_repetition(file_path):
     """
-    Finds and reports repeated captions within the provided DataFrame.
+    Finds and reports repeated captions within the provided file path.
 
     Args:
-        df (DataFrame): The DataFrame to search for repeated captions.
-        title (str): The label of the dataset for display purposes.
+        file_path (string): The file path to search for repeated captions.
     """
+    df = pd.read_csv(file_path)
+
     if 'image_caption' in df.columns:
         caption_col = 'image_caption'
     elif 'caption' in df.columns:
         caption_col = 'caption'
     else:
-        print(f"No known caption column found in {title}.")
         return
     
     # Identifying all duplicated captions
     duplicated_df = df[df.duplicated(caption_col, keep=False)]
     # Count occurrences of each caption and sort them in descending order
     caption_counts = duplicated_df[caption_col].value_counts().sort_values(ascending=False)
-
-    print(f"Dataset: {title}")
+    unique_captions = df[caption_col].nunique()
     total_repeated = caption_counts.size
-    print(f"Total number of unique captions repeated: {total_repeated}\n")
 
+    st.write(f"**Number of Unique Captions:** {unique_captions}")
+    st.write(f"**Total Number of Unique Captions Repeated**: {total_repeated}\n")
+    st.write("---")
+    
+    st.markdown("### Repeated Captions")
+    st.markdown("###")
+
+    # Display the repeated captions along with their counts in a table format
     for caption, count in caption_counts.items():
-        print(f'Caption "{caption}" repeated {count} times')
-    print("")
-
-for label, df in file_path.items():
-    find_repeated_captions(df, label)
+        st.write(f'Caption "{caption}" repeated {count} times')
+    if total_repeated == 0:
+        st.write("No repeated captions found.")
