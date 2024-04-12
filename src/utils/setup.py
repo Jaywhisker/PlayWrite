@@ -118,7 +118,8 @@ def remove_version_constraints(input_file, cuda_package, packages):
 
 
 if __name__ == "__main__":
-    status = setup_llama(hg_access_token=insert_hg_token_here)
+    hg_token = ''
+    status = setup_llama(hg_access_token=hg_token)
     print(f"Llama download exited with process {status}")
     status = setup_mustango()
     print(f"mustango download exited with process {status}")
