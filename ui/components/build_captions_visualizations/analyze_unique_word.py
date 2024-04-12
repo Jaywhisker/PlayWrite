@@ -8,10 +8,8 @@ from wordcloud import WordCloud
 def clean_and_split(text):
     """
     Clean and split the text into individual words, removing punctuation and stopwords.
-
     Args:
-    text (str): Input text to be cleaned and split.
-
+        text (str): Input text to be cleaned and split.
     Returns:
         list: List of cleaned and split words.
     """
@@ -22,42 +20,40 @@ def clean_and_split(text):
 def analyze_dataset(df, dataset_label):
     """
     Analyze the dataset.
-
     Args:
         df (DataFrame): Input DataFrame containing the dataset.
         dataset_label (str): Label for the dataset.
-
     Returns:
         tuple: A tuple containing two Counters, one for all words and one for cleaned words.
     """
     caption_col = df.columns[df.columns.str.contains('caption', case=False)][0]
-
     all_words = df[caption_col].str.cat(sep=' ').lower().split()
     all_words_clean = clean_and_split(df[caption_col].str.cat(sep=' '))
-    
+
     unique_words = set(all_words)
     unique_words_clean = set(all_words_clean)
-    
+
     print(f"Unique words of {dataset_label}: {len(unique_words)}")
     print(f"Unique words w/o stopwords of {dataset_label}: {len(unique_words_clean)}")
 
     return Counter(all_words), Counter(all_words_clean)
 
-def analyze_all_datasets(dataset_files, report_label):
+def analyze_selected_datasets(dataset_files, report_label, num_datasets=None):
     """
-    Analyze all datasets.
-
+    Analyze selected datasets based on the number of datasets specified.
     Args:
         dataset_files (dict): Dictionary containing DataFrames, where keys are dataset labels and values are DataFrames.
         report_label (str): Label for the report.
-
+        num_datasets (int): Number of datasets to analyze. If None, analyze all.
     Returns:
-        tuple: A tuple containing two Counters, one for all words and one for cleaned words across all datasets.
+        tuple: A tuple containing two Counters, one for all words and one for cleaned words across selected datasets.
     """
+    selected_files = dict(list(dataset_files.items())[:num_datasets]) if num_datasets is not None else dataset_files
+
     all_counter = Counter()
     clean_counter = Counter()
-    
-    for label, df in dataset_files.items():
+
+    for label, df in selected_files.items():
         print(f"\nAnalyzing dataset: {label}")
         counter, clean = analyze_dataset(df, label)
         all_counter += counter
@@ -72,21 +68,18 @@ def analyze_all_datasets(dataset_files, report_label):
 def plot_top_words(counter, title):
     """
     Plot the top words from the given counter.
-
     Args:
         counter (Counter): Counter object containing word frequencies.
         title (str): Title for the plot.
     """
     top_words = counter.most_common(10)
     words, counts = zip(*top_words)
-
     custom_color = (0.1, 0.4, 0.8)
-    
-    plt.figure(figsize=(5, 3))  # Adjusted the size for better visibility
+    plt.figure(figsize=(5, 3))
     plt.barh(words, counts, color=custom_color, height=0.7)
     plt.xlabel('Frequency')
     plt.title(title)
-    plt.gca().invert_yaxis() 
+    plt.gca().invert_yaxis()
     plt.show()
 
 def word_cloud(counter, title):
@@ -98,34 +91,14 @@ def word_cloud(counter, title):
         title (str): Title for the word cloud.
     """
     wordcloud = WordCloud(width=800, height=400, background_color ='white').generate_from_frequencies(counter)
-                     
-    plt.figure(figsize=(10, 5), facecolor=None)
+    plt.figure(figsize=(6, 3), facecolor=None)
     plt.imshow(wordcloud)
     plt.axis("off")
     plt.tight_layout(pad=0)
     plt.title(title, fontsize=24)
     plt.show()
 
-def generate_word_clouds(dataset_files):
-    """
-    Analyze datasets and generate word clouds for each without printing analysis details.
-
-    Args:
-        dataset_files (dict): Dictionary containing DataFrames, where keys are dataset labels and values are DataFrames.
-    """
-    for label, df in dataset_files.items():
-        # Call analyze_dataset with print_details set to False
-        _, clean_counter = analyze_dataset(df, label, print_details=False)
-        word_cloud(clean_counter, f"Word Cloud for {label}")
-
-# Analyze BLIP2 and Kosmos2 Datasets 
-landscape_path = dict(list(file_path.items())[:2])
-all_counter_first_two, clean_counter_first_two = analyze_all_datasets(landscape_path, "For Landscape Dataset")
-plot_top_words(clean_counter_first_two, "Word Count for Both BLIP2 and Kosmos2 Datasets")
-
-# Analyze All Data
-all_counter_all, clean_counter_all = analyze_all_datasets(file_path, "For All Datasets")
-plot_top_words(clean_counter_all, "Word Count for All Datasets")
-
-# Word Cloud for each data
-generate_word_clouds(file_path)
+for label, df in file_path.items():
+    _, clean_counter = analyze_dataset(df, label)
+    plot_top_words(clean_counter, f"Top Word for {label}")
+    word_cloud(clean_counter, f"Word Cloud for {label}")
