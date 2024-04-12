@@ -1,14 +1,17 @@
+# IMPORTS
+import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def analyze_caption_accuracy(df, file_label):
+def analyze_caption_accuracy(file_path):
     """
     Analyze captions within the provided DataFrame for repetitions and plot the results.
 
     Args:
-        df (DataFrame): The DataFrame to analyze.
-        file_label (str): The label of the dataset for display purposes.
+        file_path (string): The file_path to the csv containing the data.
     """
+    df = pd.read_csv(file_path)
+
     caption_col = df.columns[df.columns.str.contains('caption', case=False)][0]
 
     def has_repetition(caption):
@@ -37,11 +40,6 @@ def analyze_caption_accuracy(df, file_label):
     textprops = {'fontsize': 9, 'weight': 'bold'}
     wedges, texts = ax.pie(sizes, labels=labels_with_counts, colors=colors, startangle=90, counterclock=False, textprops=textprops)
     plt.legend(wedges, labels, loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=2, frameon=False)
-    plt.title(f'Caption Accuracy in {file_label}', pad=25, fontsize=14)
+    plt.title('Caption Accuracy', pad=25, fontsize=14)
     plt.axis('equal')
-    plt.show()
-
-    return accurate_count, inaccurate_count
-
-for label, df in file_path.items():
-    analyze_caption_accuracy(df, label)
+    st.pyplot(plt)

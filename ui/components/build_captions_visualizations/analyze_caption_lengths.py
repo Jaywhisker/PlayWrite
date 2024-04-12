@@ -56,10 +56,10 @@ def analyze_caption_lengths_by_class(file_path):
         max_length = caption_lengths.max()
 
         st.write(f"**CLASS: {image_class}**")
-        st.write(f"Mean caption Length: {mean_length}")
+        st.write(f"Mean Caption Length: {mean_length}")
         st.write(f"Minimum Caption Length: {min_length}")
         st.write(f"Maximum Caption Length: {max_length}")
 
         unique_captions = group[caption_col].nunique()
-        st.write(f"Number of unique captions: {unique_captions}")
+        st.write(f"Number of Unique Captions: {unique_captions}")
         st.write("---")
