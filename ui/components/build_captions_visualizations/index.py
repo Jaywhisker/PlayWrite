@@ -14,9 +14,9 @@ project_root = os.path.abspath(os.path.join(current_dir, '..', '..', '..'))
 
 def build_captions_visualizations():
   file_path_with_label = [
-    { 'title': 'Blip', 'file_path': os.path.join(project_root, 'src', 'data_visualisation', 'output', 'Blip_Label.csv') },
-    { 'title': 'Kosmos', 'file_path': os.path.join(project_root, 'src', 'data_visualisation', 'output', 'Kosmos_Label.csv') },
-    { 'title': 'Flicker30k', 'file_path': os.path.join(project_root, 'src', 'data_visualisation', 'output', 'flick30k_filtered_result.csv') }
+    { 'title': 'Blip', 'file_path': os.path.join(project_root, 'resources', 'data_visualisation', 'Blip_Label.csv') },
+    { 'title': 'Kosmos', 'file_path': os.path.join(project_root, 'resources', 'data_visualisation', 'Kosmos_Label.csv') },
+    { 'title': 'Flicker30k', 'file_path': os.path.join(project_root, 'resources', 'data_visualisation', 'flick30k_filtered_result.csv') }
   ]
 
   st.markdown("### Captions Analysis")

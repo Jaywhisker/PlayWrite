@@ -5,7 +5,7 @@ import os
 # CONFIGURE FILE PATHS
 current_dir = os.path.dirname(__file__)
 project_root = os.path.abspath(os.path.join(current_dir, '..', '..', '..'))
-audio_files_path = os.path.join(project_root, 'ui', 'audio_files')
+audio_files_path = os.path.join(project_root, 'resources', 'music_results')
 
 def build_music_player_section(is_music_generated, audio_file_name):
   st.markdown("### Music Player 🎵")

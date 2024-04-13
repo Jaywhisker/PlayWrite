@@ -14,7 +14,7 @@ current_dir = os.path.dirname(__file__)
 project_root = os.path.abspath(os.path.join(current_dir, '..', '..', '..'))
 models_path = os.path.join(project_root, 'models')
 resources_path = os.path.join(project_root, 'resources')
-audio_files_path = os.path.join(project_root, 'ui', 'audio_files')
+audio_files_path = os.path.join(project_root, 'resources', 'music_results')
 
 sys.path.append(project_root)
 from src.data.dataloader import Vocabulary
@@ -22,9 +22,6 @@ from src.main import playWrite
 
 sys.path = original_sys
 from utils.generate_audio_file_name import generate_audio_file_name
-
-
-print('finished!')
 
 def empty_cuda_cache(playwrite, index):
   if index == 0:
