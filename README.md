@@ -7,11 +7,11 @@ You may read on our work here: (TBD)
 Run the following code to download all required libraries for the first setup
 ```
 git clone https://github.com/Jaywhisker/PlayWrite.git
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 ___
 ### Dataset
-Please download the dataset here: (TBD) <br/> and place it inside the input folder
+Please download the dataset here: https://drive.google.com/drive/folders/1xwBZWMfBc-11yA93oS3OHRBwTSvr5UDH <br/> and place it inside the input folder
 ___
 ### PlayWrite Model Setup
 The following models are required for setup:
