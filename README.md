@@ -1,6 +1,6 @@
 # PlayWrite
 This is the repository for PlayWrite. PlayWrite is a multimodal generative ambient game music model. It takes in landscape images and text prompts to generate 10s samples of ambient game musics.
-You may read on our work here: (TBD)
+You may read on our work here: https://drive.google.com/file/d/1jciEqOkL3KZIZOKlotGJbsOfMNt3Y_Nf/view?usp=drive_link
 
 ## Setup
 ### Library Dependcies
