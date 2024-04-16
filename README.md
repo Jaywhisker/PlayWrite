@@ -7,6 +7,7 @@ You may read on our work here: https://drive.google.com/file/d/1jciEqOkL3KZIZOKl
 Run the following code to download all required libraries for the first setup
 ```
 git clone https://github.com/Jaywhisker/PlayWrite.git
+cd PlayWrite 
 pip install -r requirements.txt
 ```
 ___
@@ -20,8 +21,9 @@ The following models are required for setup:
 - inaSpeechSegmenter (If you are running the text-to-game music pipeline)
 
 The setup code has already been created, please run the following to setup Llama2-7b and Mustango locally:
-Edit the following python file (src/utils) to include your hugging face access keys and run the following
+Edit the following python file `src/utils/setup.py` to include your **hugging face access keys** and run the following
 ```
+#be in root (PlayWrite)
 python -m src.utils.setup.py
 ```
 Else you may just want to run the notebook:
@@ -39,7 +41,7 @@ Due to the current compute constraint, the UI only runs llama2-7b and does not r
 
 To start the streamlit, please run the following:
 ```
-#be in root
+#be in root (PlayWrite)
 cd ui
 streamlit run app.py
 ```
