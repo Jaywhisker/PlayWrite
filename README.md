@@ -6,6 +6,7 @@ You may read on our work here: https://drive.google.com/file/d/1jciEqOkL3KZIZOKl
 ### Library Dependcies
 Run the following code to download all required libraries for the first setup
 ```
+#Ensure that your python version is 3.9.13
 git clone https://github.com/Jaywhisker/PlayWrite.git
 cd PlayWrite 
 pip install -r requirements.txt
