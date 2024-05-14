@@ -21,7 +21,9 @@ The following models are required for setup:
 - inaSpeechSegmenter (If you are running the text-to-game music pipeline)
 
 The setup code has already been created, please run the following to setup Llama2-7b and Mustango locally:
-Edit the following python file `src/utils/setup.py` to include your **hugging face access keys** and run the following
+Edit the following python file `src/utils/setup.py` to include your **hugging face access keys**. <br><br>
+To get your hugging face keys, please sign in to your hugging face account and request access to llama here: https://huggingface.co/meta-llama/Llama-2-7b <br>
+Once approved, you may get your hugging face token by following the tutorial here: https://huggingface.co/docs/api-inference/en/quicktour and run the following.
 ```
 #be in root (PlayWrite)
 python -m src.utils.setup.py
